@@ -1,0 +1,12 @@
+#!/bin/sh
+# Runs lint, typecheck and tests before anything is pushed, standing in for
+# CI (see DECISIONS.md). Skip once, deliberately, with: git push --no-verify
+set -e
+export COREPACK_ENABLE_DOWNLOAD_PROMPT=0
+if command -v pnpm >/dev/null 2>&1; then PNPM=pnpm; else PNPM="corepack pnpm"; fi
+
+echo "pre-push: lint, typecheck and tests…"
+$PNPM -r lint
+$PNPM -r typecheck
+$PNPM -r test
+echo "pre-push: all checks passed."
