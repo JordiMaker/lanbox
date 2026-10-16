@@ -1,35 +1,30 @@
 # LANBOX
 
-Language-learning app where learners practise **their own word collections**, and the app doubles as a branded space for a sponsor (corporate image and advertising).
-
-Built with Expo (SDK 57) and React Native, so the same code runs on iOS and Android.
-
-## Run it on your phone
-
-1. Install **Expo Go** from the App Store or Google Play.
-2. In this folder run `npx expo start`.
-3. Scan the QR code with the iPhone camera (or from inside Expo Go on Android). Phone and computer must be on the same Wi-Fi.
-
-`npx expo start --web` opens it in the browser instead.
-
-## What phase 1 includes
-
-- **Collections**: paste a word list (`word = translation`, also tab, ` - `, `:`, `;`, or comma-separated words without translation).
-- **Sessions** of 5 exercises mixing four kinds: pick the meaning, pick the word, listen and pick (text-to-speech), and type the word. A missed word comes back at the end of the session, so it only finishes when every word has been answered right.
-- **Spaced repetition** (Leitner boxes): words you know come back less often.
-- **Sponsor branding**: header, buttons, home hero, end-of-session message and a sponsored slot all take the sponsor's brand. Switch between demo sponsors from *Sponsor preview* on the home screen.
-- Data is stored on the device for now.
+Mobile app that turns a short text (a song, an article, any text up to 612 characters) into translation and pronunciation mini-games, and opens when the phone is unlocked so the learner practises their weakest words. **SPEC.md** is the full specification; **DECISIONS.md** records the choices made where it is silent.
 
 ## Structure
 
-- `src/app/` – screens (Expo Router): home, new collection, collection detail, practice, sponsor preview
-- `src/lib/` – pure logic: list parsing, spaced repetition, exercise building and answer checking
-- `src/state/` – library (collections and progress) and sponsor providers
-- `src/constants/sponsors.ts` – demo sponsors (fictional brands)
+pnpm monorepo:
 
-## Next phases
+- `apps/mobile` – Expo app (SDK 57, Expo Router). It still holds the 14 Oct prototype screens until Phases 3 and 5 replace them.
+- `packages/shared` – zod schema and validator for the exercises JSON, session logic (`buildSession`, `advance`) and statistics, all pure functions with Vitest tests.
+- `apps/server` – arrives in Phase 2.
+- `assets/Visual/Plantilla minijuegos.html` – export of the design canvas.
 
-1. **AI**: generate translations, example sentences and exercises from free text (Claude, called from a backend so the API key never ships in the app); Supabase for accounts and sync.
-2. **Lock mode**: iOS Screen Time shield over apps the learner picks (requires Apple's Family Controls entitlement); overlay on Android. Needs a development build, not Expo Go.
-3. **Monetisation**: AdMob plus direct sponsor campaigns served from the backend.
-4. **Store release** via EAS Build and Submit.
+## Commands
+
+pnpm comes through corepack (bundled with Node). Run `corepack enable` once, or prefix each command with `corepack`.
+
+```sh
+pnpm install          # from the repo root
+pnpm test             # all tests (packages/shared today)
+pnpm lint             # ESLint in every workspace
+pnpm typecheck        # tsc --noEmit in every workspace
+
+pnpm --filter @lanbox/shared exec vitest run test/session.test.ts   # one test file
+pnpm --filter @lanbox/shared exec vitest -t "unlock"                # tests whose name matches
+
+pnpm --filter @lanbox/mobile start   # Expo dev server: scan the QR with Expo Go, or press w for web
+```
+
+CI (`.github/workflows/ci.yml`) runs install, lint, typecheck and test on every push once the repository has a GitHub remote.
