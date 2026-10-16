@@ -27,4 +27,4 @@ pnpm --filter @lanbox/shared exec vitest -t "unlock"                # tests whos
 pnpm --filter @lanbox/mobile start   # Expo dev server: scan the QR with Expo Go, or press w for web
 ```
 
-CI (`.github/workflows/ci.yml`) runs install, lint, typecheck and test on every push once the repository has a GitHub remote.
+CI (`.github/workflows/ci.yml`) runs install, lint, typecheck and test on every push and pull request to [github.com/JordiMaker/lanbox](https://github.com/JordiMaker/lanbox).
