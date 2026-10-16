@@ -10,7 +10,7 @@ Choices made where SPEC.md is ambiguous or silent, following its rule: take the 
 3. **No `apps/server` yet.** It arrives with Phase 2.
 4. **The mobile app keeps the 14 Oct prototype screens** until Phases 3 and 5 replace them. Until then, `noUncheckedIndexedAccess` is off in `apps/mobile` only (`strict` stays on). `src/expo-types.d.ts` references Expo's ambient types, so `tsc` works where `expo start` never ran, such as CI.
 5. **The mobile app has no `test` script** until Phase 3 brings Jest + Testing Library with the exercise screens. `pnpm test` runs the shared tests.
-6. **CI is GitHub Actions** (`.github/workflows/ci.yml`), on every push and pull request to github.com/JordiMaker/lanbox (public repository, Jordi's choice).
+6. **A local pre-push hook stands in for CI** (Jordi's choice, 16 Oct). GitHub Actions would not start on the account ("locked due to a billing issue"), so `.githooks/pre-push` runs lint, typecheck and tests and blocks the push if any fails. `pnpm install` turns it on through the root `prepare` script (`core.hooksPath`). GitHub (github.com/JordiMaker/lanbox, public) is kept as a backup copy. To bring CI back, restore the workflow deleted in the commit that added the hook.
 
 ### Data contract
 7. **Field names stay as SPEC defines them.** The exercises JSON keys and the `Attempt` fields keep their Spanish names (snake_case where SPEC uses it), because they are the contract between Claude, the server and the app. Code identifiers are in English. `creado_en` is an ISO 8601 string.

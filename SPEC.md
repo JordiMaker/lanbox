@@ -281,7 +281,7 @@ Seis fases, cada una cerrada con sus tests en verde antes de pasar a la siguient
 
 **Fase 1 — Base compartida**
 
-- [ ] Monorepo, lint, TypeScript estricto y CI que ejecuta los tests.
+- [x] Monorepo, lint, TypeScript estricto y CI que ejecuta los tests.
 - [x] Esquema zod del JSON de ejercicios y validador de reglas; tests con el JSON de «This ship is very cheap» válido y una variante rota por cada regla.
 - [x] `buildSession`, `advance` y las funciones de estadísticas con tests que reproducen los números del artboard «Sesión · lógica».
 
