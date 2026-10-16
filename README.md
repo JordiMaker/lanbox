@@ -1,56 +1,35 @@
-# Welcome to your Expo app 👋
+# LANBOX
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Language-learning app where learners practise **their own word collections**, and the app doubles as a branded space for a sponsor (corporate image and advertising).
 
-## Get started
+Built with Expo (SDK 57) and React Native, so the same code runs on iOS and Android.
 
-1. Install dependencies
+## Run it on your phone
 
-   ```bash
-   npm install
-   ```
+1. Install **Expo Go** from the App Store or Google Play.
+2. In this folder run `npx expo start`.
+3. Scan the QR code with the iPhone camera (or from inside Expo Go on Android). Phone and computer must be on the same Wi-Fi.
 
-2. Start the app
+`npx expo start --web` opens it in the browser instead.
 
-   ```bash
-   npx expo start
-   ```
+## What phase 1 includes
 
-In the output, you'll find options to open the app in a
+- **Collections**: paste a word list (`word = translation`, also tab, ` - `, `:`, `;`, or comma-separated words without translation).
+- **Sessions** of 5 exercises mixing four kinds: pick the meaning, pick the word, listen and pick (text-to-speech), and type the word. A missed word comes back at the end of the session, so it only finishes when every word has been answered right.
+- **Spaced repetition** (Leitner boxes): words you know come back less often.
+- **Sponsor branding**: header, buttons, home hero, end-of-session message and a sponsored slot all take the sponsor's brand. Switch between demo sponsors from *Sponsor preview* on the home screen.
+- Data is stored on the device for now.
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+## Structure
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+- `src/app/` – screens (Expo Router): home, new collection, collection detail, practice, sponsor preview
+- `src/lib/` – pure logic: list parsing, spaced repetition, exercise building and answer checking
+- `src/state/` – library (collections and progress) and sponsor providers
+- `src/constants/sponsors.ts` – demo sponsors (fictional brands)
 
-## Get a fresh project
+## Next phases
 
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-### Other setup steps
-
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+1. **AI**: generate translations, example sentences and exercises from free text (Claude, called from a backend so the API key never ships in the app); Supabase for accounts and sync.
+2. **Lock mode**: iOS Screen Time shield over apps the learner picks (requires Apple's Family Controls entitlement); overlay on Android. Needs a development build, not Expo Go.
+3. **Monetisation**: AdMob plus direct sponsor campaigns served from the backend.
+4. **Store release** via EAS Build and Submit.

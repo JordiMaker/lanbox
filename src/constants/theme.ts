@@ -63,3 +63,23 @@ export const Spacing = {
 
 export const BottomTabInset = Platform.select({ ios: 50, android: 80 }) ?? 0;
 export const MaxContentWidth = 800;
+
+export const FeedbackColors = {
+  correct: '#16A34A',
+  wrong: '#DC2626',
+} as const;
+
+export const Radius = {
+  small: 10,
+  medium: 16,
+  large: 24,
+} as const;
+
+/** True for light colours, so text or status bar on top should be dark. */
+export function isLightColor(hex: string) {
+  const value = parseInt(hex.replace('#', ''), 16);
+  const r = (value >> 16) & 0xff;
+  const g = (value >> 8) & 0xff;
+  const b = value & 0xff;
+  return 0.299 * r + 0.587 * g + 0.114 * b > 160;
+}

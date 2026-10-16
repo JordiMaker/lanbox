@@ -1,98 +1,171 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { Link, router } from 'expo-router';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
+import { BrandButton } from '@/components/brand-button';
+import { SponsorHero } from '@/components/sponsor-hero';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
-
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
-  }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
-  }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
-  return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
-  );
-}
+import { MaxContentWidth, Radius, Spacing } from '@/constants/theme';
+import { getLanguage } from '@/lib/languages';
+import { isDue, isLearned, isPracticable } from '@/lib/srs';
+import type { Collection } from '@/lib/types';
+import { useNow } from '@/hooks/use-now';
+import { useLibrary } from '@/state/library';
+import { useSponsor } from '@/state/sponsor';
 
 export default function HomeScreen() {
+  const { collections } = useLibrary();
+  const now = useNow();
+  const words = collections.flatMap((c) => c.words);
+  const due = words.filter((w) => isDue(w, now)).length;
+  const practicable = words.filter(isPracticable).length;
+
   return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
-          </ThemedText>
-        </ThemedView>
+    <ThemedView style={styles.screen}>
+      <ScrollView contentContainerStyle={styles.scroll}>
+        <SponsorHero />
+        <View style={styles.content}>
+          <ThemedView type="backgroundElement" style={styles.sessionCard}>
+            <ThemedText type="smallBold">Today&apos;s session</ThemedText>
+            <ThemedText style={styles.dueCount}>
+              {due > 0 ? `${due} word${due === 1 ? '' : 's'} to review` : 'All caught up'}
+            </ThemedText>
+            <BrandButton
+              title={due > 0 ? 'Start session' : 'Practise anyway'}
+              disabled={practicable === 0}
+              onPress={() => router.push('/practice')}
+            />
+          </ThemedView>
 
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
+          <View style={styles.sectionHeader}>
+            <ThemedText type="smallBold">Your collections</ThemedText>
+            <BrandButton
+              title="+ New"
+              variant="secondary"
+              style={styles.newButton}
+              onPress={() => router.push('/collection/new')}
+            />
+          </View>
 
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
-          />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
+          {collections.length === 0 ? (
+            <ThemedText themeColor="textSecondary">
+              No collections yet. Paste a list of words to start learning them.
+            </ThemedText>
+          ) : (
+            collections.map((collection) => <CollectionRow key={collection.id} collection={collection} />)
+          )}
 
-        {Platform.OS === 'web' && <WebBadge />}
-      </SafeAreaView>
+          <Link href="/sponsor" style={styles.sponsorLink}>
+            <ThemedText type="small" themeColor="textSecondary">
+              Sponsor preview
+            </ThemedText>
+          </Link>
+        </View>
+      </ScrollView>
     </ThemedView>
   );
 }
 
+function CollectionRow({ collection }: { collection: Collection }) {
+  const { sponsor } = useSponsor();
+  const total = collection.words.length;
+  const learned = collection.words.filter(isLearned).length;
+  const learning = getLanguage(collection.learningLang).name;
+  const native = getLanguage(collection.nativeLang).name;
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      onPress={() => router.push({ pathname: '/collection/[id]', params: { id: collection.id } })}
+      style={({ pressed }) => pressed && styles.pressed}>
+      <ThemedView type="backgroundElement" style={styles.collection}>
+        <View style={styles.collectionTitle}>
+          <ThemedText type="smallBold" style={styles.collectionName}>
+            {collection.name}
+          </ThemedText>
+          <ThemedText type="small" themeColor="textSecondary">
+            {learned}/{total}
+          </ThemedText>
+        </View>
+        <ThemedText type="small" themeColor="textSecondary">
+          {learning} → {native}
+        </ThemedText>
+        <ThemedView type="backgroundSelected" style={styles.progressTrack}>
+          <View
+            style={[
+              styles.progressFill,
+              { width: `${total ? (learned / total) * 100 : 0}%`, backgroundColor: sponsor.primary },
+            ]}
+          />
+        </ThemedView>
+      </ThemedView>
+    </Pressable>
+  );
+}
+
 const styles = StyleSheet.create({
-  container: {
+  screen: {
     flex: 1,
-    justifyContent: 'center',
-    flexDirection: 'row',
   },
-  safeArea: {
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
+  scroll: {
+    paddingBottom: Spacing.six,
+  },
+  content: {
+    alignSelf: 'center',
+    width: '100%',
     maxWidth: MaxContentWidth,
-  },
-  heroSection: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
-  },
-  title: {
-    textAlign: 'center',
-  },
-  code: {
-    textTransform: 'uppercase',
-  },
-  stepContainer: {
+    padding: Spacing.four,
     gap: Spacing.three,
-    alignSelf: 'stretch',
+  },
+  sessionCard: {
+    padding: Spacing.four,
+    borderRadius: Radius.large,
+    gap: Spacing.two,
+  },
+  dueCount: {
+    fontSize: 28,
+    lineHeight: 36,
+    fontWeight: 700,
+    marginBottom: Spacing.two,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: Spacing.three,
+  },
+  newButton: {
+    paddingVertical: Spacing.two,
     paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
+  },
+  collection: {
+    padding: Spacing.three,
+    borderRadius: Radius.medium,
+    gap: Spacing.one,
+  },
+  collectionTitle: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: Spacing.two,
+  },
+  collectionName: {
+    flex: 1,
+    fontSize: 17,
+  },
+  progressTrack: {
+    height: 6,
+    borderRadius: 3,
+    overflow: 'hidden',
+    marginTop: Spacing.two,
+  },
+  progressFill: {
+    height: '100%',
+  },
+  pressed: {
+    opacity: 0.7,
+  },
+  sponsorLink: {
+    alignSelf: 'center',
+    marginTop: Spacing.four,
   },
 });
